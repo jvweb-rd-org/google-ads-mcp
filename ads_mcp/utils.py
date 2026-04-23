@@ -51,6 +51,12 @@ def _create_credentials() -> google.auth.credentials.Credentials:
         return Credentials(token=token_obj.token)
 
     credentials, _ = google.auth.default(scopes=[_READ_ONLY_ADS_SCOPE])
+    # JVWEB fork : support de l'impersonation via domain-wide delegation.
+    # Si GOOGLE_ADS_IMPERSONATED_EMAIL est defini et que les credentials supportent
+    # with_subject() (service account), on impersonate l'utilisateur indique.
+    impersonated = os.environ.get("GOOGLE_ADS_IMPERSONATED_EMAIL")
+    if impersonated and hasattr(credentials, "with_subject"):
+        credentials = credentials.with_subject(impersonated)
     return credentials
 
 
